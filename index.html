@@ -479,14 +479,14 @@
         <div class="content">
             <div class="input-section">
                 <div class="input-group">
-                    <label for="sbr">🩸 Serum Bilirubin (SBR) *</label>
+                    <label for="sbr">🩸 Serum Bilirubin</label>
                     <input type="number" id="sbr" step="0.1" min="0" placeholder="Enter value in mg/dL" oninput="validateSBR()">
                     <small>mg/dL (e.g., 15.5)</small>
                     <div class="inline-error" id="sbrError"></div>
                 </div>
                 
                 <div class="input-group">
-                    <label>👶 Gestational Age (weeks) *</label>
+                    <label>👶 Gestational Age (weeks)</label>
                     <div class="ga-selector">
                         <button type="button" onclick="selectGA(32)">32</button>
                         <button type="button" onclick="selectGA(33)">33</button>
@@ -502,7 +502,7 @@
 
             <div class="input-section">
                 <div class="input-group">
-                    <label>📅 Date of Birth *</label>
+                    <label>📅 Date of Birth</label>
                     <div class="date-picker">
                         <div class="date-display" id="dobDisplay">Select date</div>
                         <div class="calendar-grid" id="dobCalendar"></div>
@@ -510,7 +510,7 @@
                 </div>
 
                 <div class="input-group">
-                    <label>🕐 Time of Birth *</label>
+                    <label>🕐 Time of Birth</label>
                     <div class="date-picker">
                         <div class="date-display" id="tobDisplay">Select time</div>
                         <div class="time-picker">
@@ -535,7 +535,7 @@
 
             <div class="input-section">
                 <div class="input-group">
-                    <label>📅 Date of Blood Test *</label>
+                    <label>📅 Date of Blood Test</label>
                     <div class="date-picker">
                         <div class="date-display" id="testDateDisplay">Select date</div>
                         <div class="calendar-grid" id="testCalendar"></div>
@@ -543,7 +543,7 @@
                 </div>
 
                 <div class="input-group">
-                    <label>🕐 Time of Blood Test *</label>
+                    <label>🕐 Time of Blood Test</label>
                     <div class="date-picker">
                         <div class="date-display" id="testTimeDisplay">Select time</div>
                         <div class="time-picker">
@@ -620,7 +620,7 @@
             
             <div class="disclaimer">
                 <p style="font-size: 13px;">
-                    This tool is based on NICE guidelines (UK) threshold graphs. This tool is not affiliated with Base Hospital Thambuttegama.
+                    This tool is based on NICE guidelines (UK) threshold graphs. Please recheck values manually before taking clinical decisions.
                 </p>
             </div>
 
