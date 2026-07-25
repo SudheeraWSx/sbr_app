@@ -402,6 +402,39 @@
             color: #999;
         }
 
+        .cord-blood-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            padding: 12px;
+            background: #f0f4ff;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .cord-blood-checkbox input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .cord-blood-checkbox label {
+            font-weight: 600;
+            color: #667eea;
+            cursor: pointer;
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .section-disabled {
+            opacity: 0.4;
+            pointer-events: none;
+            filter: grayscale(50%);
+        }
+
         .error-message {
             background: #f8d7da;
             border: 2px solid #dc3545;
@@ -449,6 +482,22 @@
             animation: blink 1.2s ease-in-out infinite;
         }
 
+        .flash-banner {
+            background: #dc3545;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            animation: flashBanner 1s ease-in-out infinite;
+        }
+
+        @keyframes flashBanner {
+            0%, 100% { background: #dc3545; }
+            50% { background: #ff6b7a; }
+        }
+
         @media (max-width: 768px) {
             .content {
                 padding: 20px;
@@ -475,18 +524,22 @@
             <p style="font-size: 16px; margin-top: 5px; font-weight: bold;">Special Care Baby Unit</p>
             <p style="font-size: 16px; opacity: 0.95; font-weight: bold;">Base Hospital Thambuttegama</p>
         </div>
+
+        <div class="flash-banner">
+            NEW! Cord Blood tests fixed!
+        </div>
         
         <div class="content">
             <div class="input-section">
                 <div class="input-group">
-                    <label for="sbr">🩸 Serum Bilirubin (SBR) </label>
+                    <label for="sbr">🩸 Serum Bilirubin (SBR) *</label>
                     <input type="number" id="sbr" step="0.1" min="0" placeholder="Enter value in mg/dL" oninput="validateSBR()">
                     <small>mg/dL (e.g., 15.5)</small>
                     <div class="inline-error" id="sbrError"></div>
                 </div>
                 
                 <div class="input-group">
-                    <label>👶 Gestational Age (weeks) </label>
+                    <label>👶 Gestational Age (weeks) *</label>
                     <div class="ga-selector">
                         <button type="button" onclick="selectGA(32)">32</button>
                         <button type="button" onclick="selectGA(33)">33</button>
@@ -502,7 +555,7 @@
 
             <div class="input-section">
                 <div class="input-group">
-                    <label>📅 Date of Birth </label>
+                    <label>📅 Date of Birth *</label>
                     <div class="date-picker">
                         <div class="date-display" id="dobDisplay">Select date</div>
                         <div class="calendar-grid" id="dobCalendar"></div>
@@ -510,7 +563,7 @@
                 </div>
 
                 <div class="input-group">
-                    <label>🕐 Time of Birth </label>
+                    <label>🕐 Time of Birth *</label>
                     <div class="date-picker">
                         <div class="date-display" id="tobDisplay">Select time</div>
                         <div class="time-picker">
@@ -530,12 +583,17 @@
                     </div>
                     <input type="hidden" id="dob">
                     <div class="inline-error" id="dobError"></div>
+
+                    <div class="cord-blood-checkbox" onclick="document.getElementById('cordBloodCheckbox').click()">
+                        <input type="checkbox" id="cordBloodCheckbox" onclick="event.stopPropagation(); toggleCordBlood()">
+                        <label for="cordBloodCheckbox" onclick="event.stopPropagation()">This is a CORD BLOOD test</label>
+                    </div>
                 </div>
             </div>
 
-            <div class="input-section">
+            <div class="input-section" id="testDateTimeSection">
                 <div class="input-group">
-                    <label>📅 Date of Blood Test </label>
+                    <label>📅 Date of Blood Test *</label>
                     <div class="date-picker">
                         <div class="date-display" id="testDateDisplay">Select date</div>
                         <div class="calendar-grid" id="testCalendar"></div>
@@ -543,7 +601,7 @@
                 </div>
 
                 <div class="input-group">
-                    <label>🕐 Time of Blood Test </label>
+                    <label>🕐 Time of Blood Test *</label>
                     <div class="date-picker">
                         <div class="date-display" id="testTimeDisplay">Select time</div>
                         <div class="time-picker">
@@ -620,7 +678,7 @@
             
             <div class="disclaimer">
                 <p style="font-size: 13px;">
-                    This tool is based on NICE guidelines (UK) threshold graphs. Please recheck the result manually before taking any clinical decision.
+                    This tool is based on NICE guidelines (UK) threshold graphs. This tool is not affiliated with Base Hospital Thambuttegama.
                 </p>
             </div>
 
@@ -637,6 +695,50 @@
         let testDate = null, testHour = null, testMinute = null, testAmPm = null;
         let calculatedPOA = null;
         let blinkInterval = null;
+        let isCordBlood = false;
+
+        function toggleCordBlood() {
+            const checkbox = document.getElementById('cordBloodCheckbox');
+            isCordBlood = checkbox.checked;
+            const testSection = document.getElementById('testDateTimeSection');
+            
+            if (isCordBlood) {
+                // Disable and gray out the test date/time section
+                testSection.classList.add('section-disabled');
+                
+                // Copy birth date/time to test date/time
+                testDate = dobDate;
+                testHour = dobHour;
+                testMinute = dobMinute;
+                testAmPm = dobAmPm;
+                
+                if (dobDate && dobHour !== null && dobMinute !== null && dobAmPm !== null) {
+                    updateTestDateTime();
+                    
+                    // Update the visual display of test calendar/time to match birth
+                    document.getElementById('testDateDisplay').textContent = formatDate(dobDate);
+                    document.getElementById('testTimeDisplay').textContent = 
+                        dobHour.toString().padStart(2, '0') + ':' + 
+                        dobMinute.toString().padStart(2, '0') + ' ' + dobAmPm;
+                }
+            } else {
+                // Re-enable the test date/time section
+                testSection.classList.remove('section-disabled');
+                
+                // Clear the test date/time so user can select fresh
+                testDate = null;
+                testHour = null;
+                testMinute = null;
+                testAmPm = null;
+                calculatedPOA = null;
+                document.getElementById('testDateTime').value = '';
+                document.getElementById('testDateDisplay').textContent = 'Select date';
+                document.getElementById('testTimeDisplay').textContent = 'Select time';
+                
+                document.querySelectorAll('#testCalendar .calendar-day.selected').forEach(day => day.classList.remove('selected'));
+                document.querySelectorAll('#testHour .time-item.selected, #testMinute .time-item.selected, #testAmPm .time-item.selected').forEach(item => item.classList.remove('selected'));
+            }
+        }
 
         function validateSBR() {
             const sbr = parseFloat(document.getElementById('sbr').value);
@@ -834,6 +936,20 @@
                 document.getElementById('tobDisplay').textContent = 
                     dobHour.toString().padStart(2, '0') + ':' + 
                     dobMinute.toString().padStart(2, '0') + ' ' + dobAmPm;
+                
+                // If cord blood test is checked, keep test date/time in sync with birth date/time
+                if (isCordBlood) {
+                    testDate = dobDate;
+                    testHour = dobHour;
+                    testMinute = dobMinute;
+                    testAmPm = dobAmPm;
+                    document.getElementById('testDateDisplay').textContent = formatDate(dt);
+                    document.getElementById('testTimeDisplay').textContent = 
+                        dobHour.toString().padStart(2, '0') + ':' + 
+                        dobMinute.toString().padStart(2, '0') + ' ' + dobAmPm;
+                    updateTestDateTime();
+                }
+                
                 calculatePOA();
                 validateDateTime();
             }
@@ -983,7 +1099,7 @@
             const poa = calculatedPOA;
             const ga = selectedGA;
             
-            if (!sbr || !dob || !testDateTime || !poa || !ga) {
+            if (!sbr || !dob || !testDateTime || poa === null || poa === undefined || !ga) {
                 alert('Please fill in all required fields');
                 return;
             }
@@ -1257,6 +1373,10 @@
             testMinute = null;
             testAmPm = null;
             calculatedPOA = null;
+            isCordBlood = false;
+            
+            document.getElementById('cordBloodCheckbox').checked = false;
+            document.getElementById('testDateTimeSection').classList.remove('section-disabled');
             
             // Hide blinking dot
             const blinkDot = document.getElementById('blinkingDot');
